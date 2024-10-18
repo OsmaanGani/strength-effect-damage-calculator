@@ -3,44 +3,62 @@ from tkinter import *
 from tkinter import ttk
 from PIL import Image, ImageTk
 
-def resetSubmit():
-    label.config(text="Input The Ammount Of \n Damage Of Your Weapons: ")
-    entryBox.delete(0, END)
-    submitButton.config(text="Submit", command=damageSubmit)
+class App:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Minecraft Strength Calculator")
+        self.root.geometry("500x270")
+        self.root.resizable(False, False)
 
-def strengthSubmit():
-    global strength
-    strength = int(entryBox.get())
-    finalDamage = damage * pow(1.3, strength) + ((pow(1.3, strength) - 1) / 0.3 )
-    label.config(text="\nYour Final Damage Is")
-    submitButton.config(text="Reset", command = resetSubmit)
-    entryBox.insert(0, f"{finalDamage: .1f}")
+        self.bg = Image.open("window_bg.png")
+        self.bg_tk = ImageTk.PhotoImage(self.bg)
+        self.label = ttk.Label(self.root, image=self.bg_tk)
+        self.label.place(x=0, y=0)
+        text = "Input The Ammount Of \n Base Damage Of Your Weapons: "
+        self.label = Label(self.root, text=text, font=("Century Gothic", 20))
+        self.label.pack()
 
-def damageSubmit():
-    global damage
-    damage = int(entryBox.get())
-    label.config(text="Input The Level Of \n Strength")
-    submitButton.config(command= strengthSubmit)
-    entryBox.delete(0, END)
+        self.entryBox = Entry(self.root, font=("Century Gothic", 30))
+        self.entryBox.place(x=31, y=120)
 
-mainWindow = Tk()
-mainWindow.geometry("500x270")
-mainWindow.title("Minecraft Strength Counter")
+        self.submitButton = Button(self.root, text="Submit", command=self.damageSubmit, font=("Century Gothic", 20))
+        self.submitButton.place(x=31, y=190)
 
-mainWindow.resizable(False, False)
+    def damageSubmit(self):
+        global damage
+        try:
+            damage = int(self.entryBox.get())
+        except ValueError:
+            text = "Input The Ammount Of \n Base Damage Of Your Weapons:\nPlease input a valid number"
+            self.label.config(text=text)
+            return
+        text = "Input Your Strength Level: "
+        self.label.config(text=text)
+        self.submitButton.config(command=self.strengthSubmit)
+        self.entryBox.delete(0, END)
 
-bg = Image.open("window_bg.png")
-bg_tk = ImageTk.PhotoImage(bg)
-label = ttk.Label(mainWindow,image= bg_tk)
-label.place(x=0,y=0)
+    def strengthSubmit(self):
+        global strength
+        try:
+            strength = int(self.entryBox.get())
+        except ValueError:
+            text = "Input Your Strength Level:\nPlease input a valid number"
+            self.label.config(text=text)
+            return
+        finalDamage = damage * pow(1.3, strength) + ((pow(1.3, strength) - 1) / 0.3)
+        self.label.config(text="\nYour destinated damage")
+        self.submitButton.config(text="Reset", command=self.resetSubmit)
+        self.entryBox.insert(0, f"{finalDamage: .1f}")
+        self.entryBox.config(state=DISABLED, disabledbackground="white", disabledforeground="black")
 
-label = Label(mainWindow, text="Input The Ammount Of \n Base Damage Of Your Weapons: ", font=("Century Gothic", 20))
-label.pack()
+    def resetSubmit(self):
+        self.entryBox.config(state=NORMAL)
+        text = "Input The Ammount Of \n Base Damage Of Your Weapons: "
+        self.label.config(text=text)
+        self.entryBox.delete(0, END)
+        self.submitButton.config(text="Submit", command=self.damageSubmit)
 
-entryBox = Entry(mainWindow, font=("Century Gothic", 30))
-entryBox.place(x=31,y=120)
-
-submitButton = Button(mainWindow, text="Submit", command = damageSubmit, font=("Century Gothic", 20))
-submitButton.place(x=31,y=190)
-
-mainWindow.mainloop()
+if __name__ == "__main__":
+    mainWindow = Tk()
+    app = App(mainWindow)
+    mainWindow.mainloop()
